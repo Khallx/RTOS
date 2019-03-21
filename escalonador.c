@@ -44,7 +44,7 @@ double CalcUtilTeorico(const size_t size)
 {
     double n = (double) size;
     printf("n %g\n", n);
-    return n * (pow(2, (1/n)) - 1);             //calcula limite teorico de Deadline Monotonica //TODO: NAO RECONHECE POW??
+    return n * (pow(2, (1/n)) - 1);             //calcula limite teorico de Deadline Monotonica 
 }
 
 
@@ -52,7 +52,6 @@ int analiseUtil(const Tarefa *t, const size_t size)
 {
     return (CalcUtilReal(t, size) < CalcUtilTeorico(size));
 }
-//TODO: CALCULAR OUTRO LIMITE COM SOMATORIO ITERATIVO
 
 
 /*  R(i+1) = C + sum(ceil(Ri/Pj)*Cj)  para j pertencente ao conjunto de tarefas com maior prioridade  */
@@ -116,7 +115,7 @@ int main()
     double tempTeorico = CalcUtilTeorico(SIZE);
     int analise = analiseUtil(task, SIZE);
 
-    printf("real: %g teorico: %g\n", tempReal, tempTeorico, analise);
+    printf("real: %g teorico: %g\n", tempReal, tempTeorico);
     if(analise)
         printf("As tarefas são escalonaveis pelo teste de utlização\n");
     else
