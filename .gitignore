@@ -1,0 +1,5 @@
+*.exec
+*.o
+.vscode/ipch/a241f3c444ff4060/mmap_address.bin
+.vscode/ipch/a241f3c444ff4060/primos_th.ipch
+Threads/prime
