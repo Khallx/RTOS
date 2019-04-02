@@ -3,3 +3,17 @@
 .vscode/ipch/a241f3c444ff4060/mmap_address.bin
 .vscode/ipch/a241f3c444ff4060/primos_th.ipch
 Threads/prime
+Threads/afinidade.c
+Threads/prioridade.c
+.vscode/ipch/b9cacd65306e77d8/prioridade.ipch
+.vscode/ipch/b9cacd65306e77d8/mmap_address.bin
+Threads/prioridade
+escalonador.c
+.vscode/ipch/3188fadd5bff41aa/id.ipch
+.vscode/ipch/3188fadd5bff41aa/mmap_address.bin
+.vscode/ipch/b38c9618d56eb5c3/mmap_address.bin
+.vscode/ipch/b38c9618d56eb5c3/second.ipch
+.vscode/ipch/bf0b5b9501d9c910/afinidade.ipch
+.vscode/ipch/bf0b5b9501d9c910/mmap_address.bin
+Threads/afinidade
+Threads/second
