@@ -9,12 +9,12 @@
 
 
 void *wait2sec(void *arg) {
-    int *tid;
     clockid_t clk;
     struct timespec t;
     if(pthread_getcpuclockid(pthread_self(), &clk))
     {
         printf("Erro em achar clk id de thread[%ld]\n", pthread_self());
+        pthread_exit(NULL);
     }
     clock_gettime(clk, &t);
     while(t.tv_sec < 10)
