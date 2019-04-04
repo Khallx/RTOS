@@ -1,0 +1,7 @@
+O   quê   acontece   se   associarmos   mais   de   uma   CPU   e escalonar a thread naquele conjunto?
+    FIFO, RR: As threads acabam em tempos proximos, independente da prioridade, entretanto, se duas threads   
+ocupam o mesmo CPU, elas terminam em ordem decrescente de prioridade.
+
+Com  prioridades  iguais,  o  quê  acontece  com  o  código desenvolvido?
+    RR: A ultima thread criada parece sair por ultimo.
+    FIFO:   AS threads parecem acabarem em ordem de criação.
