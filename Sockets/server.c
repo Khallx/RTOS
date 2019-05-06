@@ -11,6 +11,12 @@
 #define BUFFER_SIZE 256
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
+struct nodo {
+    int newsockfd;
+    int porta;
+    char ip[12];
+    struct nodo *next;
+};
 
 typedef struct argument
 {
@@ -19,12 +25,7 @@ typedef struct argument
 }argument_t;
 
 // para cada nodo: socket de conexão (obtido através de um accept), porta desse nodo, ip desse nodo
-struct nodo {
-    int newsockfd;
-    int porta;
-    char ip[12];
-    struct nodo *next;
-};
+
 
 struct nodo *Head = NULL;
 
@@ -59,9 +60,11 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     listen(sockfd,5);
+
     while (1) {
         new_connection(Head, sockfd,(struct sockaddr *) &cli_addr,&clilen);
     }
+
     //    close(newsockfd);
     //    close(sockfd);
     return 0; 
@@ -83,7 +86,7 @@ void *server(void *arg) {
             cancel_connection(current);             //destroy connection
         }
         // MUTEX LOCK - GERAL
-        mutex_lock(&m);
+        pthread_mutex_lock(&m);
         while(head != NULL) {
             if (head == current) {
                 n = write(head->newsockfd,buffer,50);
@@ -94,23 +97,23 @@ void *server(void *arg) {
             }
             // COMO LIDAR COM COMANDO SAIR
         }
-        mutex_unlock(&m);
+        pthread_mutex_unlock(&m);
         // MUTEX UNLOCK - GERAL
     }
 }
 
 
-int new_connection(struct nodo *head, int sockfd, struct sockaddr * const cli_addr, socklen_t * const clilen)
+int new_connection(struct nodo *head, int sockfd, struct sockaddr * cli_addr, socklen_t * clilen)
 {
     pthread_t new_server;
-    struct node *first_node = head;
-    int newsk = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen);
+    struct nodo *first_node = head;
+    int newsk = accept(sockfd,(struct sockaddr *) cli_addr,clilen);
     if(newsk < 0)
     {
         return -1;
     };
 
-    mutex_lock(&m);     //mutex to create new node:
+    pthread_mutex_lock(&m);     //mutex to create new node:
     while(head != NULL)
     {
         head->next;
@@ -119,7 +122,7 @@ int new_connection(struct nodo *head, int sockfd, struct sockaddr * const cli_ad
     head->next = NULL;
   
     pthread_create(&new_server, NULL, server, (void *)first_node);
-    mutex_unlock(&m);
+    pthread_mutex_unlock(&m);
 }
 
 
