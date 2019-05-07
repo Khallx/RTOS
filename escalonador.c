@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define SIZE 10  //number of tasks
-#define SEED 255  //seed for random numbers
+#define SEED 0  //seed for random numbers
 #define PERIODOMAX 1000
 #define COMPMAX 25
 typedef struct _tarefa
@@ -43,7 +44,7 @@ double CalcUtilReal(const Tarefa * t, const size_t size)
 double CalcUtilTeorico(const size_t size)
 {
     double n = (double) size;
-    printf("n %g\n", n);
+    //printf("n %g\n", n);
     return n * (pow(2, (1/n)) - 1);             //calcula limite teorico de Deadline Monotonica 
 }
 
@@ -100,7 +101,7 @@ int main()
 {
     Tarefa task[SIZE];
 
-    srand(SEED);
+    srand(time(NULL));
     for(int i = 0; i < SIZE; i ++)
     {
         task[i].comp = (double) (rand()  % COMPMAX) + 1;
@@ -122,9 +123,9 @@ int main()
         printf("As tarefas NÃO são escalonaveis pelo teste de utlização\n");
 
     if(analiseResposta(task, SIZE))
-        printf("Pelo teste de resposta as tarefas são escalonaveis");
+        printf("Pelo teste de resposta as tarefas são escalonaveis\n");
     else
-        printf("Pelo teste de resposta as tarefas NÃO são escalonaveis");
+        printf("Pelo teste de resposta as tarefas NÃO são escalonaveis\n");
 
     return 0;
 }
