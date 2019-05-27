@@ -9,25 +9,23 @@
 
 
 #define BUFFER_SIZE 256
+#define MAX_CON 5
 pthread_mutex_t m1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t m2 = PTHREAD_MUTEX_INITIALIZER;
 
 
 typedef struct nodo {
     int newsockfd;
-    int porta;
-    char ip[12];
-    struct nodo *next;
+    int index;
+    //int porta;
+    //char ip[12];
 }node_t;
 
-// para cada nodo: socket de conexão (obtido através de um accept), porta desse nodo, ip desse nodo
+node_t node[MAX_CON] = {-1};
 
-
-node_t *Lista = NULL;
-
-int cancel_connection(node_t *head);
+int cancel_connection(const int i);
 void *server(void *arg);
-int new_connection(node_t *head, int sockfd, struct sockaddr * const cli_addr, socklen_t * const clilen);
+int new_connection(int sockfd);
 int close_socket(int sockfd);
 
 int main(int argc, char *argv[]) {
@@ -65,7 +63,8 @@ int main(int argc, char *argv[]) {
     }
 
     //escuta até 5 conexões
-    listen(sockfd,5);
+    listen(sockfd,MAX_CON);
+    printf("Escutando por conexões até %d conexões...\n", MAX_CON);
 
     while (1) {
         new_connection(Lista, sockfd,(struct sockaddr *) &cli_addr, &clilen);
@@ -77,8 +76,6 @@ int main(int argc, char *argv[]) {
 
 
 void *server(void *arg) {
-    node_t *head = Lista;                                  //contains address the current iteration of node
-    node_t *const current = (node_t *) arg;                //contains address the thread's node
     int i, n;
     char buffer[BUFFER_SIZE];
 
@@ -97,34 +94,36 @@ void *server(void *arg) {
         head = Lista;
         printf("%ld\n", head);
         while(head != NULL) {
-            //if (head != current) {
+            if (head != current) {
                 n = write(head->newsockfd,buffer,50);
                 printf("escrevendo em %d: %s", head->newsockfd, buffer);
                 if (n <= 0) {
                     printf("Erro escrevendo no socket!\n");
                     cancel_connection(head);
                 }
-            //}
+            }
             head = head->next;
         }
-
+        /*
         if(strcmp(buffer, "sair") == 0)
         {
             cancel_connection(current);
-        }
+        }*/
         pthread_mutex_unlock(&m2);
         // MUTEX UNLOCK - GERAL
     }
 }
 
 
-int new_connection(node_t *head, int sockfd, struct sockaddr * cli_addr, socklen_t * clilen)
+int new_connection(int sockfd)
 {
     pthread_t new_server;
     node_t *first_node = Lista;
     struct sockaddr *client_addr;
     socklen_t *client_lenght;
-    //argument_t arg;
+    int i;
+    //static node_t node[MAX_CON] = {0};
+    //static index = 0;
 
     int newsk = accept(sockfd,(struct sockaddr *) client_addr, client_lenght);
     if(newsk < 0)
@@ -133,36 +132,25 @@ int new_connection(node_t *head, int sockfd, struct sockaddr * cli_addr, socklen
     };
     printf("entrando no mutex\n");
     pthread_mutex_lock(&m1);     //mutex to create new node:
-    while(head != NULL)
-    {
-        printf("procurando ultima\n");
-        head = head->next;
-    }
-    head = malloc(sizeof(node_t));
-    head->newsockfd = newsk;
-    head->next = NULL;
-    printf("valor de Lista: %d valor de head: %d\n", Lista, head);
-    pthread_create(&new_server, NULL, server, (void *) head);
-    printf("criada thread: %d\t%ld\n", head->next, head->newsockfd);
+    for(i = 0; i < MAX_CON || node[i].index != -1; i++)  {}
+    if(i == MAX_CON)
+    node[i].newsockfd = newsk;
+    node[i].index = i;
+    printf("valor de index: %d\n", index);
+    pthread_create(&new_server, NULL, server, NULL);
+    printf("criada thread: %d\n", index);
+    index++;
     pthread_mutex_unlock(&m1);
 }
 
 
-int cancel_connection(node_t *head)
+int cancel_connection(const int i)
 {
-    node_t *list = Lista;
-    if(head == NULL) return -1;         //list is null
-
     pthread_mutex_lock(&m1);
-    close_socket(head->newsockfd);
-
-    while(list->next != head)
-    {
-        list = list->next;
-    }
-    list->next = head->next;
-    free(head);
-    printf("Excluido conexão da lista\n");
+    close_socket(node[i].newsockfd);
+    printf("Excluido conexão %d da lista\n", i);
+    node[i].newsockfd = 0;
+    node[i].index  = -1;
     pthread_mutex_unlock(&m1);
     pthread_exit(NULL);
     return 0;

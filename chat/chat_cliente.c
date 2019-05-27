@@ -15,7 +15,7 @@ void *leitura(void *arg) {
     char buffer[256];
     int n;
     while (1) {
-        bzero(buffer,sizeof(buffer));
+        memset(buffer, '0', sizeof(buffer));
         n = recv(sockfd,buffer,50,0);
         if (n <= 0) {
             printf("Erro lendo do socket!\n");
@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
         printf("Digite a mensagem (ou sair):");
         fgets(buffer,50,stdin);
         n = send(sockfd,buffer,50,0);
-        if (n == -1) {
+        if (n <= 0) {
             printf("Erro escrevendo no socket!\n");
-            return -1;
+            break;
         }
         if (strcmp(buffer,"sair\n") == 0) {
             break;
