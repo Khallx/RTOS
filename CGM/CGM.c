@@ -4,14 +4,18 @@
 #include <pthread.h>
 #include <time.h>
 
-#define RAND_RANGE 20           // value of maximun increment or decrement between each seasor reading
+#define LIST_SIZE 50     //size of circular buffer that contains the last read glucose values
 
+pthread_mutex_t list_mutex = PTHREAD_MUTEX_INITIALIZER;         //mutex to acess glucose_list vector and index_list
 /*
     simulates a continuos glucose test reading randomized data
     comunicates with a terminal to 
     TODO: explaing what this does
 */
 
+static int glucose_list[LIST_SIZE] = {0};
+static int index_list = 0;
+static int list_mean;
 
 //returns blood glucose value read from sensor in mg/dL
 //TODO: mudar isso pra ser dependente te 2 parametros: a cada x leituras o usuario usa insulina ou se alimenta
@@ -53,8 +57,47 @@ int read_sensor()
 }
 
 
+void *periodic_reading(void *arg)
+{
+    struct periodic_info info;
+	make_periodic (500000, &info);      //period of 500 ms
+
+    while(1)
+    {
+        pthread_mutex_lock(&list_mutex);
+            glucose_list[index_list] = read_sensor();
+            index_list = (index_list + 1) % LIST_SIZE;       //circular buffer.
+        pthread_mutex_unlock(&list_mutex);
+        wait_period(&info);
+    }
+}
+
+
+void *periodic_mean(void *arg)
+{
+    struct periodic_info info;
+	make_periodic (1000000, &info);      //period of 1 s
+    int current_index;
+    int list[LIST_SIZE];
+    int mean;
+    while(1)
+    {
+        pthread_mutex_lock(&list_mutex);
+            //read the current available readings
+            for(int i = 0; i < LIST_SIZE; i++)
+            {
+                list[i] = glucose_list[i];
+            }
+        pthread_mutex_unlock(&list_mutex);
+        //calculate mean value
+        for(int i = 0; i < LIST_SIZE; i++)
+            mean += (list[i] / LIST_SIZE);
+        list_mean = mean;       //make mean visible globaly
+    }
+}
+
+
 int main(int argc, char *argv[]) 
 {
-    for(int i = 0; i < 500; i++)
-        printf("%d\n", read_sensor());
+
 }

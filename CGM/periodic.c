@@ -1,6 +1,5 @@
 #include "periodic.h"
 
-
 int make_periodic (int unsigned period_us, struct periodic_info *info)
 {
 	static int next_sig;
