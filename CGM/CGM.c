@@ -13,33 +13,48 @@
 */
 
 
-//returns blood glucose value read from sensor
-//the value read is always +- 20 units from the last reading
-//change is randomized and the sensor never reads below 20 mg/ml
+//returns blood glucose value read from sensor in mg/dL
 //TODO: mudar isso pra ser dependente te 2 parametros: a cada x leituras o usuario usa insulina ou se alimenta
 //fazendo um incremento e decremento constante apartir disso
 int read_sensor()
 {
-    static int last_value = 100;        //initial glucose level is 100 mg/dl
-    srand(time(NULL));                  //TODO: change seed to a time variable
-    last_value += (rand() % (2*RAND_RANGE)) - RAND_RANGE;       // range of increment is -RAND_RANGE to + RAND_RANGE
-    //limits reading values to range 20 to 400
-    if(last_value < 20)
+    static int blood_glucose = 100;                  //initial glucose level is 100 mg/dl
+    static int food_counter, insulin_counter, index;  // counts the number of reading food and insulin will act upon blood sugar
+    
+    srand(blood_glucose + food_counter + index);
+    if(index == 0)
     {
-        last_value = 10 + (rand() % (2*RAND_RANGE));
+        food_counter += rand() % 5;
     }
-    else if(last_value > 400)
+    else if(index == 5)
     {
-        last_value = 400 - (rand() % (2*RAND_RANGE));
+        insulin_counter += rand() % 5;
     }
-    return last_value;
+    //calculate blood glucose
+    if(blood_glucose < 30)
+    {
+        blood_glucose += rand() % 20 + 20;
+        food_counter++;         //to compensate the low blood sugar
+    } 
+    else if(blood_glucose > 400)
+    {
+        blood_glucose -= (rand() % 20 + 20);
+        insulin_counter++;      //to compensate the high blood sugar
+    }
+    else
+    {
+       blood_glucose += (food_counter*food_counter/8) - (insulin_counter*insulin_counter/8) + (rand()%6 - 3);
+    }
+    index = (index + 1) % 25;                   //every 25 reading the cicle restarts  
+    food_counter -= (food_counter) ? 0 : 1;
+    insulin_counter -= (insulin_counter) ? 0 : 1;
+
+    return blood_glucose;
 }
 
 
-int main()
+int main(int argc, char *argv[]) 
 {
-    for(int i = 0; i < 500; i ++)
-    {
+    for(int i = 0; i < 500; i++)
         printf("%d\n", read_sensor());
-    }
 }

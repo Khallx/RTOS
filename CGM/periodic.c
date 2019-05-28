@@ -1,7 +1,7 @@
 #include "periodic.h"
 
 
-static int make_periodic (int unsigned period_us, struct periodic_info *info)
+int make_periodic (int unsigned period_us, struct periodic_info *info)
 {
 	static int next_sig;
 	int ret;
@@ -44,7 +44,7 @@ static int make_periodic (int unsigned period_us, struct periodic_info *info)
 }
 
 
-static void wait_period (struct periodic_info *info)
+void wait_period (struct periodic_info *info)
 {
 	int sig;
 	sigwait (&(info->alarm_sig), &sig);
