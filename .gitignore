@@ -41,3 +41,14 @@ Threads/consumer
 .vscode/ipch/c294967acf8789e2/periodic.ipch
 CGM/glucose.txt
 CGM/cgm
+chat/server
+chat/cliente
+.vscode/ipch/c3efc2f78112f16/mmap_address.bin
+.vscode/ipch/1380099e96f349e6/mmap_address.bin
+.vscode/ipch/55365180de5e1b5c/mmap_address.bin
+.vscode/ipch/55365180de5e1b5c/tasks.ipch
+.vscode/ipch/55365c80de5e2e0d/mmap_address.bin
+.vscode/ipch/55365c80de5e2e0d/tasks.ipch
+.vscode/ipch/94fe93954965478b/mmap_address.bin
+.vscode/ipch/c3efc2f78112f16/escalonador.ipch
+chat/server_vic.c

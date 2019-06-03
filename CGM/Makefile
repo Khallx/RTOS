@@ -1,6 +1,6 @@
-CFLAGS= -Wall -pthread -lrt
-TARGETS= CGM.c periodic.c 
-make: CGM.c periodic.c 
+CFLAGS= -pthread -lrt -O2
+TARGETS= CGM.c periodic.h tasks.h
+make: $(TARGETS)
 	gcc $(TARGETS) -o cgm $(CFLAGS)
 clean:
-	rm cgm *.o
+	rm -f cgm *.o
