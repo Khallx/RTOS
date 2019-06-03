@@ -1,6 +1,6 @@
 *.exec
 *.o
-.vscode/ipch/a241f3c444ff4060/mmap_address.bin
+.vscode/
 .vscode/ipch/a241f3c444ff4060/primos_th.ipch
 Threads/prime
 Threads/afinidade.c
@@ -52,3 +52,6 @@ chat/cliente
 .vscode/ipch/94fe93954965478b/mmap_address.bin
 .vscode/ipch/c3efc2f78112f16/escalonador.ipch
 chat/server_vic.c
+.vscode/ipch/94fe93954965478b/controller.ipch
+.vscode/ipch/1bac40c739e91d50/mmap_address.bin
+.vscode/ipch/1bac40c739e91d50/server_vic.ipch

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
     pthread_t mean, read, check;
     sigset_t alarm_sig;
-    printf("Continuos Glucouse Monitoring Simulator - CGM\n");
+    printf("Continuos Glucouse Monitoring Simulator - CGMS\n");
     if(argc < 3)
     {
         printf("Error: please define IP address and port number\n");
@@ -29,10 +29,7 @@ int main(int argc, char *argv[])
 
     //configure real time signals
     //Block all real time signals so they can be used for the timers.
-    sigemptyset (&alarm_sig);
-	for (int i = SIGRTMIN; i <= SIGRTMAX; i++)
-		sigaddset (&alarm_sig, i);
-	sigprocmask (SIG_BLOCK, &alarm_sig, NULL);
+    set_periodic_signals();
 
     //create the 3 periodic tasks
     if(pthread_create(&read, NULL, periodic_reading, NULL))
