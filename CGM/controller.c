@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #include <string.h>
 
 /*
@@ -34,11 +35,7 @@ void close_socket(int sockfd)
     pthread_mutex_unlock(&accept_com_mutex);
 }
 
-void print_usage()
-{
-    printf("usage:\n");
-    //todo: mostrar como usar
-}
+
 
 void *commands(void * arg)
 {
@@ -49,82 +46,40 @@ void *commands(void * arg)
     while(1)
     {
         memset(buffer, 0, sizeof(buffer));
-        fgets(buffer, 50, stdin);
-        bytes_transferred = send(sockfd, buffer, 50, NULL);
+        if(fgets(buffer, 50, stdin)== NULL)
+        {
+            printf("Error: failure on fgets\n");
+            exit(-1);
+        }
+        bytes_transferred = write(sockfd, buffer, 50);
+        printf("Writes %s\n", buffer);
         if(bytes_transferred <= 0)
         {
             close_socket(sockfd);
             pthread_exit(NULL);
         }
-        memset(buffer, 0, sizeof(buffer));
-        bytes_transferred = recv(sockfd,buffer,50,0);
-        if(bytes_transferred <= 0)
-        {
-            close_socket(sockfd);
-            pthread_exit(NULL);
-        }
-        printf("%s\n", buffer);
+        // memset(buffer, 0, sizeof(buffer));
+        // bytes_transferred = read(sockfd,buffer,50);
+        // if(bytes_transferred <= 0)
+        // {
+        //     close_socket(sockfd);
+        //     pthread_exit(NULL);
+        // }
+        // printf("%s\n", buffer);
     }
 }
 
-//parses a NULL terminated string and return an integer associated with the parsed command
-//returns -1 on failure and prints usage
-//returns 1 for parsed "set high" and sets *value to <value>
-//returns 2 for parsed "set low" and sets  *value to <value>
-//returns 3 for parsed "read mean"
-//returns 4 for parsed "read last"
-int parse_command(char * str, int * value)
+
+void *read_socket(void *arg)
 {
-    *value = -1;
-    char * arg1 = strsep(&str, " \n\t");
-    char * arg2 = strsep(&str, " \n\t");
-    if(strcmp(arg1, "set") == 0)
-    {
-        *value = 0;
-        if(str != NULL)
-            *value = atoi(str);
-        if(strcmp(arg2, "low") == 0 && *value > 0)
-        {
-            return 1;
-        }
-        else if(strcmp(arg2, "high") == 0 && *value > 0)
-        {
-            return 2;
-        }
-        else
-        {
-            print_usage();
-            return -1;
-        }
-    }
-    else if(strcmp(arg1, "read") == 0)
-    {
-        if(strcmp(arg2, "mean") == 0)
-        {
-            return 3;
-        }
-        else if(strcmp(arg2, "last") == 0)
-        {
-            return 4;
-        }
-        else
-        {
-            print_usage();
-            return -1;
-        }
-    }
-    else
-    {
-        print_usage();
-        return -1;
-    }
+
 }
 
 int main(int argc, char *argv[])
 {
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
-    int sockfd, clientsockfd, portnumber;
+    int sockfd, clientsockfd, port_number;
     pthread_t commander;
 
     printf("Continuos Glucouse Monitoring Controller - CGMC\n");
@@ -135,8 +90,8 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    portnumber = atoi(argv[1]);
-    if(portnumber < 1024 || portnumber > 49151)
+    port_number = atoi(argv[1]);
+    if(port_number < 1024 || port_number > 49151)
     {
         printf("Error: port number is not in range of 1024 to 49151\n");
         exit(-1);
@@ -154,7 +109,7 @@ int main(int argc, char *argv[])
     memset((char *) &serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(portnumber);
+    serv_addr.sin_port = htons(port_number);
     if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         printf("Error: failed to bind socket\n");
         exit(-1);
@@ -165,7 +120,7 @@ int main(int argc, char *argv[])
         printf("Error: failed to listen to socket\n");
         exit(-1);
     }
-    printf("Listening for 1 connection on port %d...\n", portnumber);
+    printf("Listening for 1 connection on port %d...\n", port_number);
 
     //waits for a new connection, creates a thread to handle communication,
     //sets the number of connections to +1
@@ -177,6 +132,7 @@ int main(int argc, char *argv[])
             pthread_cond_wait(&accept_com_cond, &accept_com_mutex);
         }
         clientsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
+        printf("New connection accepted!\n");
         if (clientsockfd < 0) {
             printf("Error: failure on socket accept\n");
             exit(-1);
