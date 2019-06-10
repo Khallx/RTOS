@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <string.h>
 
+
+#define BUFFER_SIZE 250
 /*
     Sends comands to CGM based on comand line inputs
     Commands are:
@@ -40,47 +42,55 @@ void close_socket(int sockfd)
 void *commands(void * arg)
 {
     int sockfd = (int) arg;
-    char buffer[50];
+    char buffer[BUFFER_SIZE];
     int bytes_transferred;
 
     while(1)
     {
         memset(buffer, 0, sizeof(buffer));
-        if(fgets(buffer, 50, stdin)== NULL)
+        if(fgets(buffer, BUFFER_SIZE, stdin)== NULL)
         {
             printf("Error: failure on fgets\n");
             exit(-1);
         }
-        bytes_transferred = write(sockfd, buffer, 50);
+        bytes_transferred = write(sockfd, buffer, BUFFER_SIZE);
         printf("Writes %s\n", buffer);
         if(bytes_transferred <= 0)
         {
             close_socket(sockfd);
+            printf("Failure to write socket, closing connection\n");
             pthread_exit(NULL);
         }
-        // memset(buffer, 0, sizeof(buffer));
-        // bytes_transferred = read(sockfd,buffer,50);
-        // if(bytes_transferred <= 0)
-        // {
-        //     close_socket(sockfd);
-        //     pthread_exit(NULL);
-        // }
-        // printf("%s\n", buffer);
     }
 }
 
 
 void *read_socket(void *arg)
 {
-
+    int sockfd = (int) arg;
+    char buffer[BUFFER_SIZE];
+    int bytes_transferred;
+    while(1)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        bytes_transferred = read(sockfd,buffer,BUFFER_SIZE);
+        if(bytes_transferred <= 0)
+        {
+            close_socket(sockfd);
+            printf("Failure to read socket, closing connection\n");
+            pthread_exit(NULL);
+        }
+        printf("%s\n", buffer);
+    }
 }
+
 
 int main(int argc, char *argv[])
 {
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
     int sockfd, clientsockfd, port_number;
-    pthread_t commander;
+    pthread_t commander, reader;
 
     printf("Continuos Glucouse Monitoring Controller - CGMC\n");
     if(argc < 2)
@@ -140,6 +150,11 @@ int main(int argc, char *argv[])
         if(pthread_create(&commander, NULL, commands, (void *)clientsockfd))
         {
             printf("Error: could not create a new commander thread\n");
+            exit(-1);
+        }
+        if(pthread_create(&reader, NULL, read_socket, (void *)clientsockfd))
+        {
+            printf("Error: could not create a new read_socket thread\n");
             exit(-1);
         }
         num_connections++;
