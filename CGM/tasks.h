@@ -67,7 +67,7 @@ int read_sensor()
         blood_glucose += rand() % 20 + 20;
         food_counter++;         //to compensate the low blood sugar
     } 
-    else if(blood_glucose > 400)
+    else if(blood_glucose > 250)
     {
         blood_glucose -= (rand() % 20 + 20);
         insulin_counter++;      //to compensate the high blood sugar
@@ -144,8 +144,9 @@ void *periodic_mean(void *arg)
 void *periodic_check_levels(void *arg)
 {
     struct periodic_info info;
-	make_periodic (30000000, &info);      //period of 30s
+	make_periodic (15000000, &info);      //period of 15s
     int mean, hypo, hyper;
+    char string[BUFFER_SIZE];
     //checks last mean and checks if it is a hipoglucose or a hiperglucose level.
     while(1)
     {
@@ -158,12 +159,15 @@ void *periodic_check_levels(void *arg)
         pthread_mutex_unlock(&limit_mutex);
         if(mean < hypo && mean != 0)
         {
-            //snprintf(string, 50, "Hypoglucose value: %d", mean);
-            printf("Hipoglucose value of %d\n", mean);
+            snprintf(string, 50, "New hypoglucose value: %d\n", mean);
+            send_message(string);
+            //printf("Hipoglucose value of %d\n", mean);
         }
         else if(mean > hyper)
         {
-            printf("Hyperglucose of %d\n", mean);
+            snprintf(string, 50, "New hyperglucose value: %d\n", mean);
+            send_message(string);
+            //printf("Hyperglucose of %d\n", mean);
         }
         wait_period(&info);
     }
@@ -238,7 +242,7 @@ void *comand_handler(void * arg)
 
     while(1)
     {
-        printf("Waiting for command:\n");
+        printf("Waiting for command...\n");
         memset(buffer, 0, sizeof(buffer));
         bytes_transferred = read(sockfd,buffer,BUFFER_SIZE);
         if(bytes_transferred <= 0)
@@ -270,7 +274,6 @@ void *write_socket(void *arg)
         strcpy(buffer, messages);
         message_available--;
         //send it to socket
-        printf("Writing to socket: %s\n", buffer);
         bytes_transferred = write(sockfd, buffer, BUFFER_SIZE);
         if(bytes_transferred <= 0)
         {
@@ -343,7 +346,7 @@ void read_last()
 
 void print_usage()
 {
-    send_message("Wrong usage\n");
+    send_message("Command not found\nUsage:\n\tread mean\n\tread last\n\tset low <value>\n\tset high <value>\n");
 }
 
 

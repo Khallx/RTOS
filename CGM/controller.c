@@ -54,13 +54,12 @@ void *commands(void * arg)
             exit(-1);
         }
         bytes_transferred = write(sockfd, buffer, BUFFER_SIZE);
-        printf("Writes %s\n", buffer);
-        if(bytes_transferred <= 0)
-        {
-            close_socket(sockfd);
-            printf("Failure to write socket, closing connection\n");
-            pthread_exit(NULL);
-        }
+        // if(bytes_transferred <= 0)
+        // {
+        //     close_socket(sockfd);
+        //     //printf("Failure to write socket, closing connection\n");
+        //     pthread_exit(NULL);
+        // }
     }
 }
 
@@ -80,7 +79,7 @@ void *read_socket(void *arg)
             printf("Failure to read socket, closing connection\n");
             pthread_exit(NULL);
         }
-        printf("%s\n", buffer);
+        printf("%s", buffer);
     }
 }
 
@@ -141,6 +140,7 @@ int main(int argc, char *argv[])
         {
             pthread_cond_wait(&accept_com_cond, &accept_com_mutex);
         }
+        printf("Waiting for a new connection...\n");
         clientsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
         printf("New connection accepted!\n");
         if (clientsockfd < 0) {
