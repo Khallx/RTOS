@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
+    //listen for a single connection
     if(listen(sockfd, 1) < 0) 
     {
         printf("Error: failed to listen to socket\n");

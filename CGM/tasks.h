@@ -159,13 +159,13 @@ void *periodic_check_levels(void *arg)
         pthread_mutex_unlock(&limit_mutex);
         if(mean < hypo && mean != 0)
         {
-            snprintf(string, 50, "New hypoglucose value: %d\n", mean);
+            snprintf(string, 50, "New hypoglucose value: %d mg/dL\n", mean);
             send_message(string);
             //printf("Hipoglucose value of %d\n", mean);
         }
         else if(mean > hyper)
         {
-            snprintf(string, 50, "New hyperglucose value: %d\n", mean);
+            snprintf(string, 50, "New hyperglucose value: %d mg/dL\n", mean);
             send_message(string);
             //printf("Hyperglucose of %d\n", mean);
         }
@@ -295,11 +295,11 @@ void set_high(int value)
     if(hypoglucose_limit < value)
     {
         hyperglucose_limit = value;         //hyperglucose_limit must always be higher than hypoglucose_limit
-        snprintf(string, BUFFER_SIZE, "Hyperglucose limit: %d\n", hyperglucose_limit);
+        snprintf(string, BUFFER_SIZE, "Hyperglucose limit: %d  mg/dL\n", hyperglucose_limit);
     }
     else
     {
-        snprintf(string, BUFFER_SIZE, "Value lower than hypoglucose, unchanged from: %d\n", hyperglucose_limit);
+        snprintf(string, BUFFER_SIZE, "Value lower than hypoglucose, unchanged from: %d  mg/dL\n", hyperglucose_limit);
     } 
     pthread_mutex_unlock(&limit_mutex);
     send_message(string);
@@ -313,11 +313,11 @@ void set_low(int value)
     if(hyperglucose_limit > value)
     {
         hypoglucose_limit = value;         //hypoglucose_limit must always be lower than hyperglucose_limit
-        snprintf(string, BUFFER_SIZE, "Hypoglucose limit: %d\n", hypoglucose_limit);
+        snprintf(string, BUFFER_SIZE, "Hypoglucose limit: %d  mg/dL\n", hypoglucose_limit);
     }
     else
     {
-        snprintf(string, BUFFER_SIZE, "Value higher than hyperglucose, unchanged from: %d\n", hypoglucose_limit);
+        snprintf(string, BUFFER_SIZE, "Value higher than hyperglucose, unchanged from: %d  mg/dL\n", hypoglucose_limit);
     } 
     pthread_mutex_unlock(&limit_mutex);
     send_message(string);
@@ -328,7 +328,7 @@ void read_mean()
 {
     char string[BUFFER_SIZE];
     pthread_mutex_lock(&mean_mutex);
-    snprintf(string, BUFFER_SIZE, "Current mean: %d\n", list_mean);
+    snprintf(string, BUFFER_SIZE, "Current mean: %d  mg/dL\n", list_mean);
     pthread_mutex_unlock(&mean_mutex);
     send_message(string);
 }
@@ -338,7 +338,7 @@ void read_last()
 {
     char string[BUFFER_SIZE];
     pthread_mutex_lock(&list_mutex);
-    snprintf(string, BUFFER_SIZE, "Last read value: %d\n", glucose_list[list_index]);
+    snprintf(string, BUFFER_SIZE, "Last read value: %d  mg/dL\n", glucose_list[list_index]);
     pthread_mutex_unlock(&list_mutex);
     send_message(string);
 }
