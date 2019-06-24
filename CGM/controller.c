@@ -27,7 +27,8 @@ pthread_mutex_t accept_com_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t accept_com_cond = PTHREAD_COND_INITIALIZER;
 int num_connections = 0;
 
-//closes socket, frees conditional variable to allow new connections
+
+//closes socket, frees conditional variable to allow for new connections
 void close_socket(int sockfd)
 {
     pthread_mutex_lock(&accept_com_mutex);
@@ -39,6 +40,7 @@ void close_socket(int sockfd)
 
 
 
+//reads data from comand line, and sends it to socket
 void *commands(void * arg)
 {
     int sockfd = (int) arg;
@@ -54,16 +56,16 @@ void *commands(void * arg)
             exit(-1);
         }
         bytes_transferred = write(sockfd, buffer, BUFFER_SIZE);
-        // if(bytes_transferred <= 0)
-        // {
-        //     close_socket(sockfd);
-        //     //printf("Failure to write socket, closing connection\n");
-        //     pthread_exit(NULL);
-        // }
+        if(bytes_transferred <= 0)
+        {
+             close_socket(sockfd);
+             pthread_exit(NULL);
+        }
     }
 }
 
 
+//reads data from socket and prints it to terminal
 void *read_socket(void *arg)
 {
     int sockfd = (int) arg;

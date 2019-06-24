@@ -52,7 +52,7 @@ int read_sensor()
     static int blood_glucose = 100;                  //initial glucose level is 100 mg/dl
     static int food_counter, insulin_counter, index;  // counts the number of reading food and insulin will act upon blood sugar
     
-    srand(blood_glucose + food_counter + index);        //TODO : change seed
+    srand(blood_glucose + food_counter + index); 
     if(index == 0)
     {
         food_counter += rand() % 5;
@@ -95,7 +95,6 @@ void *periodic_reading(void *arg)
     {
         pthread_mutex_lock(&list_mutex);
             glucose_list[list_index] = read_sensor();
-            //printf("periodic_reading():\t glucose_list[list_index]=%d\tlist_index=%d\n", glucose_list[list_index], list_index);
             list_index = (list_index + 1) % LIST_SIZE;       //circular buffer.
         pthread_mutex_unlock(&list_mutex);
         wait_period(&info);
@@ -106,8 +105,8 @@ void *periodic_reading(void *arg)
 void *periodic_mean(void *arg)
 {
     struct periodic_info info;
-	make_periodic (1000000, &info);      //period of 1 s
-    int list[LIST_SIZE];
+	make_periodic (4000000, &info);      //period of 4 s
+    int list[MEAN_SAMPLES];
     int mean;
     int i;
     while(1)
@@ -123,15 +122,17 @@ void *periodic_mean(void *arg)
             i = list_index - MEAN_SAMPLES;
         }
         
-        for(; i < list_index; i = (i+1) % LIST_SIZE)
+        for(int j = 0; i < list_index; i = (i+1) % LIST_SIZE, j++)
         {
-            list[i] = glucose_list[i];
+            list[j] = glucose_list[i];
         }
         pthread_mutex_unlock(&list_mutex);
         //calculate mean value
         mean = 0;
         for(i = 0; i < MEAN_SAMPLES; i++)
+        {
             mean += (list[i] / MEAN_SAMPLES);
+        }
         
         pthread_mutex_lock(&mean_mutex);
         list_mean = mean;       //make mean visible globaly
@@ -144,7 +145,7 @@ void *periodic_mean(void *arg)
 void *periodic_check_levels(void *arg)
 {
     struct periodic_info info;
-	make_periodic (15000000, &info);      //period of 15s
+	make_periodic (15000000, &info);      //period of 15 s
     int mean, hypo, hyper;
     char string[BUFFER_SIZE];
     //checks last mean and checks if it is a hipoglucose or a hiperglucose level.
@@ -338,7 +339,7 @@ void read_last()
 {
     char string[BUFFER_SIZE];
     pthread_mutex_lock(&list_mutex);
-    snprintf(string, BUFFER_SIZE, "Last read value: %d  mg/dL\n", glucose_list[list_index]);
+    snprintf(string, BUFFER_SIZE, "Last read value: %d  mg/dL\n", glucose_list[list_index ? list_index-1 : 50]);
     pthread_mutex_unlock(&list_mutex);
     send_message(string);
 }

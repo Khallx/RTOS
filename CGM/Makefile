@@ -5,4 +5,4 @@ make: $(TARGETS) $(TARGETS2)
 	gcc $(TARGETS) -o cgm $(CFLAGS)
 	gcc $(TARGETS2) -o ctrl $(CFLAGS)
 clean:
-	rm -f cgm *.o
+	rm -f cgm ctrl *.o
